@@ -1,4 +1,6 @@
-flask
-flask-bootstrap
-flask-moment
-flask-script
+flask~=3.0.3
+flask-bootstrap~=3.3.7.1
+flask-moment~=1.0.6
+flask-script~=2.0.6
+flask-wtf~=1.2.1
+WTForms~=3.1.2

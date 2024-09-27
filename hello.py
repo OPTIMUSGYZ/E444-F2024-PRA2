@@ -5,6 +5,7 @@ from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
+from wtforms.fields.simple import EmailField
 from wtforms.validators import DataRequired
 
 app = Flask(__name__)
@@ -14,8 +15,9 @@ bootstrap = Bootstrap(app)
 moment = Moment(app)
 
 
-class NameForm(FlaskForm):
+class UserInfoForm(FlaskForm):
     name = StringField('What is your name?', validators=[DataRequired()])
+    email = EmailField('Enter your email address:', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
 
@@ -31,15 +33,26 @@ def internal_server_error(e):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    name = None
-    form = NameForm()
-    if form.validate_on_submit():
+    user_info_form = UserInfoForm()
+    if user_info_form.validate_on_submit():
         old_name = session.get('name')
-        if old_name is not None and old_name != form.name.data:
+        new_name = user_info_form.name.data
+        if old_name is not None and old_name != new_name:
             flash("Looks like you have changed your name!")
-        session['name'] = form.name.data
+        session['name'] = new_name
+
+        old_email = session.get('email')
+        new_email = user_info_form.email.data
+        if "utoronto" in new_email.lower():
+            if old_email is not None and old_email != new_email:
+                flash("Looks like you have changed your email!")
+        else:
+            new_email = None
+        session['email'] = new_email
+
         return redirect(url_for('index'))
-    return render_template('index.html', current_time=datetime.now(timezone.utc), form=form, name=session.get('name'))
+
+    return render_template('index.html', current_time=datetime.now(timezone.utc), username_form=user_info_form, name=session.get('name'), email=session.get('email'))
 
 
 @app.route('/user/<name>')
